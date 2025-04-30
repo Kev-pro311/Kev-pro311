@@ -1,0 +1,77 @@
+-- Global control variables
+getgenv().G = false
+getgenv().Creator = ' - HalloweenGaster'
+
+local radius = 50 -- Max distance from the player to affect enemies
+
+-- Create the GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ControlGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Draggable Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 100)
+mainFrame.Position = UDim2.new(0.4, 0, 0.4, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+-- Toggle Button
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 200, 0, 40)
+toggleButton.Position = UDim2.new(0, 10, 0, 10)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextSize = 22
+toggleButton.Text = "Turn ON"
+toggleButton.Parent = mainFrame
+
+-- Status Label
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(0, 200, 0, 25)
+statusLabel.Position = UDim2.new(0, 10, 0, 55)
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextColor3 = Color3.new(1, 1, 1)
+statusLabel.Font = Enum.Font.SourceSans
+statusLabel.TextSize = 20
+statusLabel.Text = "Status: OFF"
+statusLabel.Parent = mainFrame
+
+-- Main loop
+spawn(function()
+    while true do
+        wait(1)
+        if getgenv().G and getgenv().Creator == ' - HalloweenGaster' then
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if not character or not character:FindFirstChild("HumanoidRootPart") then continue end
+
+            local origin = character.HumanoidRootPart.Position
+
+            for _, obj in pairs(game.Workspace:GetDescendants()) do
+                if obj:IsA("Humanoid") and obj.Parent ~= character then
+                    local hrp = obj.Parent:FindFirstChild("HumanoidRootPart")
+                    if hrp and (hrp.Position - origin).Magnitude <= radius then
+                        obj.Health = 0
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- Toggle logic
+toggleButton.MouseButton1Click:Connect(function()
+    getgenv().G = not getgenv().G
+    if getgenv().G then
+        toggleButton.Text = "Turn OFF"
+        statusLabel.Text = "Status: ON"
+    else
+        toggleButton.Text = "Turn ON"
+        statusLabel.Text = "Status: OFF"
+    end
+end)
